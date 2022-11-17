@@ -8,6 +8,7 @@ const DEFAULT_MAIN_BRANCH_NAME = "main";
 
 export interface GitProps {
   codeStarConnectionSSMParameterName: string;
+  githubTokenSSMParameterName: string;
   owner: string;
   repository: string;
   branch?: string;
@@ -26,6 +27,10 @@ export class PipelineStack extends Stack {
       parameterName: props.git.codeStarConnectionSSMParameterName,
     }).stringValue;
 
+    const githubToken = ssm.StringParameter.fromSecureStringParameterAttributes(this, "GithubTokenSecureParameter", {
+      parameterName: props.git.githubTokenSSMParameterName,
+    }).stringValue;
+
     const repositoryName = `${props.git.owner}/${props.git.repository}`;
     const branch = props.git.branch ?? DEFAULT_MAIN_BRANCH_NAME;
 
@@ -34,7 +39,12 @@ export class PipelineStack extends Stack {
         input: CodePipelineSource.connection(repositoryName, branch, {
           connectionArn: connectionArn,
         }),
-        commands: ["npm ci", "npm run synth"],
+        commands: [
+          `npm set //npm.pkg.github.com/:_authToken ${githubToken}`,
+          "npm set @tymoteuszgach:registry=https://npm.pkg.github.com/",
+          "npm ci",
+          "npm run synth",
+        ],
       }),
     });
 
