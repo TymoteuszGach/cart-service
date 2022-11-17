@@ -34,7 +34,7 @@ export class PipelineStack extends Stack {
         input: CodePipelineSource.connection(repositoryName, branch, {
           connectionArn: connectionArn,
         }),
-        commands: ["npm run build", "npm run synth"],
+        commands: ["npm ci", "npm run build", "npm run synth"],
       }),
     });
 
