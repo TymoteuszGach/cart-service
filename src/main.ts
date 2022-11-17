@@ -11,7 +11,6 @@ const props: PipelineStackProps = {
   git: {
     owner: REPOSITORY_OWNER,
     repository: REPOSITORY_NAME,
-    codeStarConnectionSSMParameterName: "/github-connection-arn",
   },
   pipelineAppStageProps: {},
 };

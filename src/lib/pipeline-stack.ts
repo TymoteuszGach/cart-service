@@ -6,12 +6,15 @@ import { Construct } from "constructs";
 import { PipelineAppStage, PipelineAppStageProps } from "./pipeline-app-stage";
 
 const DEFAULT_MAIN_BRANCH_NAME = "main";
+const DEFAULT_CODE_STAR_CONNECTION_SSM_PARAMETER_NAME = "/github-connection-arn";
+const DEFAULT_GITHUB_TOKEN_SSM_PARAMETER_NAME = "/github-token";
 
 export interface GitProps {
-  codeStarConnectionSSMParameterName: string;
   owner: string;
   repository: string;
   branch?: string;
+  codeStarConnectionSSMParameterName?: string;
+  githubTokenSSMParameterName?: string;
 }
 
 export interface PipelineStackProps extends StackProps {
@@ -24,7 +27,7 @@ export class PipelineStack extends Stack {
     super(scope, id, props);
 
     const connectionArn = ssm.StringParameter.fromStringParameterAttributes(this, "ConnectionParameter", {
-      parameterName: props.git.codeStarConnectionSSMParameterName,
+      parameterName: props.git.codeStarConnectionSSMParameterName ?? DEFAULT_CODE_STAR_CONNECTION_SSM_PARAMETER_NAME,
     }).stringValue;
 
     const repositoryName = `${props.git.owner}/${props.git.repository}`;
@@ -45,7 +48,7 @@ export class PipelineStack extends Stack {
           environmentVariables: {
             GITHUB_TOKEN: {
               type: BuildEnvironmentVariableType.PARAMETER_STORE,
-              value: "/github-token",
+              value: props.git.githubTokenSSMParameterName ?? DEFAULT_GITHUB_TOKEN_SSM_PARAMETER_NAME,
             },
           },
         },
